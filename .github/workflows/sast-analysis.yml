@@ -1,0 +1,28 @@
+name: SAST with Bandit
+
+on:
+  # Déclencheur manuel
+  workflow_dispatch:
+
+  # Déclencheur automatique lors d'une pull request vers la branche main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  bandit-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code  # Étape 1 : Cloner le dépôt
+        uses: actions/checkout@v3
+
+      - name: Setup Python  # Étape 2 : Installer Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'  # Remplacez par la version de Python souhaitée
+
+      - name: Install Bandit  # Étape 3 : Installer Bandit
+        run: pip install bandit
+
+      - name: Run Bandit  # Étape 4 : Exécuter l'analyse
+        run: bandit -r .
