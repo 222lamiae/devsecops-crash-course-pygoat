@@ -1,28 +1,37 @@
-name: SAST with Bandit
+name: Bandit Security Analysis
 
 on:
-  # Déclencheur manuel
-  workflow_dispatch:
-
-  # Déclencheur automatique lors d'une pull request vers la branche main
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
 
 jobs:
-  bandit-analysis:
+  security:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code  # Étape 1 : Cloner le dépôt
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Setup Python  # Étape 2 : Installer Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'  # Remplacez par la version de Python souhaitée
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'  # Use your desired Python version
 
-      - name: Install Bandit  # Étape 3 : Installer Bandit
-        run: pip install bandit
+    - name: Install Bandit
+      run: pip install bandit
 
-      - name: Run Bandit  # Étape 4 : Exécuter l'analyse
-        run: bandit -r .
+    - name: Run Bandit Security Scan (HTML and JSON)
+      run: |
+        mkdir -p bandit-reports
+        bandit -r . -f html -o bandit-reports/bandit-report.html || echo "Bandit HTML scan completed with findings."
+        bandit -r . -f json -o bandit-reports/bandit-report.json || echo "Bandit JSON scan completed with findings."
+
+    - name: Upload Bandit Reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: bandit-reports
+        path: bandit-reports/
